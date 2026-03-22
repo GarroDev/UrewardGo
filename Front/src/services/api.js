@@ -1,0 +1,172 @@
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+export const API_BASE = BASE_URL;
+
+async function http(path, { method = "GET", data, token } = {}) {
+  const headers = {};
+  if (!(data instanceof FormData)) headers["Content-Type"] = "application/json";
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(BASE_URL + path, {
+    method,
+    headers,
+    body: data
+      ? (data instanceof FormData ? data : JSON.stringify(data))
+      : undefined,
+  });
+
+  const text = await res.text();
+  let body = null;
+
+  if (text) {
+    try {
+      body = JSON.parse(text);
+    } catch (err) {
+      body = text;
+    }
+  }
+
+  if (!res.ok) {
+    const message =
+      (body && body.msg) ||
+      (body && body.message) ||
+      (body && body.error) ||
+      `Error ${res.status} ${res.statusText}`;
+    throw new Error(message);
+  }
+  return body;
+}
+
+// AUTH
+export async function login(email, password) {
+  return http('/api/auth/login', { method: 'POST', data: { email, password } });
+}
+export async function register(payload) {
+  return http('/api/auth/register', { method: 'POST', data: payload });
+}
+export async function getProfile(token) {
+  return http('/api/auth/me', { method: 'GET', token });
+}
+export async function resetPassword(email, newPassword) {
+  return http('/api/auth/reset-password', { method: 'POST', data: { email, newPassword } });
+}
+
+// TAREAS
+export async function createTask(payload) {
+  const token = localStorage.getItem("token");
+  return http("/api/tasks", { method: "POST", data: payload, token });
+}
+export async function listTasks() {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE}/api/tasks`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return Array.isArray(data) ? data : [];
+}
+export async function updateTask(id, data) {
+  const token = localStorage.getItem("token");
+  return http(`/api/tasks/${id}`, { method: "PUT", data, token });
+}
+export async function deleteTask(id) {
+  const token = localStorage.getItem("token");
+  return http(`/api/tasks/${id}`, { method: "DELETE", token });
+}
+export async function submitTaskFile(taskId, file) {
+  const token = localStorage.getItem("token");
+  const fd = new FormData();
+  fd.append("file", file);
+  return http(`/api/tasks/${taskId}/submit`, { method: "POST", data: fd, token });
+}
+export async function listUserTasks() {
+  const token = localStorage.getItem("token");
+  return http(`/api/tasks/user/list`, { method: "GET", token });
+}
+export async function listTaskSubmissions(taskId) {
+  const token = localStorage.getItem("token");
+  return http(`/api/tasks/${taskId}/submissions`, { method: "GET", token });
+}
+export async function decideSubmission(taskId, subId, action, feedback = "") {
+  const token = localStorage.getItem("token");
+  return http(`/api/tasks/${taskId}/submission/${subId}/decision`, {
+    method: "PATCH",
+    data: { action, feedback },
+    token,
+  });
+}
+export async function completeTask(id) {
+  const token = localStorage.getItem("token");
+  return http(`/api/tasks/${id}`, {
+    method: "PUT",
+    data: { status: "Completada" },
+    token,
+  });
+}
+export async function claimPoints(taskId) {
+  const token = localStorage.getItem("token");
+  return http(`/api/tasks/${taskId}/claim`, { method: "POST", token });
+}
+
+// RECOMPENSAS
+export async function listRewards() {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE}/api/recompensas`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return Array.isArray(data) ? data : [];
+}
+export async function getRewards() {
+  return listRewards();
+}
+export async function createReward(payload) {
+  const token = localStorage.getItem("token");
+  return http("/api/recompensas", { method: "POST", data: payload, token });
+}
+export async function updateReward(id, data) {
+  const token = localStorage.getItem("token");
+  return http(`/api/recompensas/${id}`, { method: "PUT", data, token });
+}
+export async function deleteReward(id) {
+  const token = localStorage.getItem("token");
+  return http(`/api/recompensas/${id}`, { method: "DELETE", token });
+}
+export async function redeemReward(rewardId) {
+  const token = localStorage.getItem("token");
+  return http(`/api/recompensas/${rewardId}/redeem`, { method: "POST", token });
+}
+
+// USUARIOS (Admin)
+export async function listUsers() {
+  const token = localStorage.getItem("token");
+  return http("/api/usuarios", { method: "GET", token });
+}
+
+export async function createUser(payload) {
+  const token = localStorage.getItem("token");
+  // POST a /api/users para crear usuario nuevo siendo admin
+  return http("/api/usuarios", { method: "POST", data: payload, token });
+}
+
+export async function updateUser(id, data) {
+  const token = localStorage.getItem("token");
+  return http(`/api/usuarios/${id}`, { method: "PUT", data, token });
+}
+
+export async function deleteUser(id) {
+  const token = localStorage.getItem("token");
+  return http(`/api/usuarios/${id}`, { method: "DELETE", token });
+}
+
+// HISTORIAL DE CANJES 
+export async function listCanjes() {
+  const token = localStorage.getItem("token");
+  return http("/api/historial-canje", { method: "GET", token });
+}
+
+// RANKING
+export async function getRanking() {
+  const token = localStorage.getItem("token");
+  return http("/api/rankings", { method: "GET", token });
+}
