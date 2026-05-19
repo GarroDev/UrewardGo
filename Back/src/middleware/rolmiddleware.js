@@ -1,6 +1,7 @@
 export function requireRol(rol) {
+  const roles = Array.isArray(rol) ? rol : [rol];
   return (req, res, next) => {
-    if (req.user.rol === rol) {
+    if (roles.includes(req.user.rol)) {
       return next();
     }
     return res.status(403).json({ message: "Acceso denegado: rol insuficiente" });

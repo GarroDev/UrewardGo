@@ -222,7 +222,7 @@ export default function Rewards() {
   }
 
   async function handleRedeem(r) {
-    if (user.rol !== 'Trabajador') return;
+    if (user.rol !== 'Trabajador' && user.rol !== 'Lider') return;
 
     if ((user.points || 0) < r.puntosRequeridos) {
       Swal.fire({
@@ -412,7 +412,7 @@ export default function Rewards() {
                     </button>
                   </div>
                 )}
-                {user.rol === 'Trabajador' && (
+                {(user.rol === 'Trabajador' || user.rol === 'Lider') && (
                   <button
                     onClick={() => handleRedeem(r)}
                     className="btn-action update-btn"

@@ -76,6 +76,7 @@ export default function Users() {
           <label style="${labelStyle}">Rol de usuario</label>
           <select id="newRol" style="${inputStyle} cursor: pointer;">
             <option value="Trabajador">Trabajador</option>
+            <option value="Lider">Líder</option>
             <option value="Admin">Administrador</option>
           </select>
 
@@ -150,6 +151,7 @@ export default function Users() {
           <label style="${labelStyle}">Rol</label>
           <select id="rol" style="${inputStyle}">
             <option value="Trabajador" ${u.rol === "Trabajador" ? "selected" : ""}>Trabajador</option>
+            <option value="Lider" ${u.rol === "Lider" ? "selected" : ""}>Líder</option>
             <option value="Admin" ${u.rol === "Admin" ? "selected" : ""}>Admin</option>
           </select>
         </div>

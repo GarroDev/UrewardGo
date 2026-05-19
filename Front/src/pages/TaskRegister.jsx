@@ -20,15 +20,16 @@ export default function TaskRegister() {
   const [success, setSuccess] = useState('')
   const [tasks, setTasks] = useState([])
   const [editing, setEditing] = useState(null)
+  const canManageTasks = user?.rol === "Admin" || user?.rol === "Lider"
 
   async function refreshSubmissions() {
     try {
       let tasksFromServer = []
 
-      if (user?.rol === "Admin") {
+      if (canManageTasks) {
         tasksFromServer = (await listTasks().catch(() => []))
           .filter(t => t.status !== "Completada" && t.status !== "Rechazada")
-        // Para Admin, NO pedir submission
+        // Para Admin y Líder, NO pedir submission
         setTasks(tasksFromServer)
         return
       }
@@ -399,7 +400,7 @@ export default function TaskRegister() {
     <div className="container" style={{ padding: 0 }}>
 
 
-      {user?.rol === "Admin" && (
+      {canManageTasks && (
 
         <div className="card" style={{ marginBottom: 16 }}>
           <h3 style={{ marginBottom: 8 }}>Registrar Tarea</h3>
@@ -544,7 +545,7 @@ export default function TaskRegister() {
   </div>
 )}
 
-              {user?.rol === "Admin" && (
+              {canManageTasks && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
                   <div style={{ display: "flex", gap: 10 }}>
                     <button onClick={() => onEdit(t)} className="btn-action update-btn">Actualizar</button>
